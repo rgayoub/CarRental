@@ -41,11 +41,17 @@ $statement->bindParam(':owner_id', $ownerId);
 $statement->execute();
 $earnings = $statement->fetchColumn();
 
-$query = "SELECT total_price as price, DATE(created_at) as date FROM bookings WHERE owner GROUP BY DATE(created_at)";
+$query = "SELECT b.total_price as price, DATE(b.created_at) as date 
+          FROM bookings b
+          JOIN cars c ON b.car_id = c.id
+          WHERE c.owner_id = :owner_id 
+          GROUP BY DATE(b.created_at)";
 
 $statement = $connection->prepare($query);
+$statement->bindParam(':owner_id', $ownerId, PDO::PARAM_INT);  // Explicitly bind as an integer
 $statement->execute();
 $owner_chart_data = $statement->fetchAll(PDO::FETCH_ASSOC);
+
 
 require_once ('Layout/Owner_layout.php')
 
